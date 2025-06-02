@@ -1,8 +1,8 @@
 import EvdevReader, { Evdev } from "evdev";
 
-console.log("Hello World!");
-
 const reader = new EvdevReader();
+
+const pressedKeys: Set<string> = new Set();
 
 function DoStuff() {
   if (!process.argv[2]) {
@@ -14,7 +14,17 @@ function DoStuff() {
   console.log(target_match);
 
   reader.on("EV_KEY", function (data) {
-    console.log("key : ", data.code, data.value);
+    //console.log("key : ", data.code, data.value);
+    
+    if (data.value === 1) {
+      pressedKeys.add(data.code);
+    } else if (data.value === 0) {
+      pressedKeys.delete(data.code);
+    }
+
+    console.log(pressedKeys);
+    
+    checkKeybind();
   });
 
   reader.on("error", function (e) {
@@ -22,6 +32,24 @@ function DoStuff() {
   });
 
   let device = reader.open(target_match);
+}
+
+function makeKeyBind(keys: string[], action: () => void) {
+  return { keys, action };
+}
+
+function checkKeybind() {
+  const keybinds = [
+    makeKeyBind(["KEY_A", "KEY_B"], () => {
+      console.log("A and B pressed");
+    }),
+  ];
+
+  for (const keybind of keybinds) {
+    if (keybind.keys.every(key => pressedKeys.has(key))) {
+      keybind.action();
+    }
+  }
 }
 
 DoStuff();
