@@ -1,5 +1,7 @@
 import EvdevReader, { Evdev } from "evdev";
 
+require('../build/Release/addon.node'); 
+
 const reader = new EvdevReader();
 
 const pressedKeys: Set<string> = new Set();
@@ -22,7 +24,7 @@ function DoStuff() {
       pressedKeys.delete(data.code);
     }
 
-    console.log(pressedKeys);
+    //console.log(pressedKeys);
     
     checkKeybind();
   });
