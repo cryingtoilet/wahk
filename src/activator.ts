@@ -16,10 +16,24 @@
 import EvdevReader, { Evdev } from "evdev";
 
 class Activator {
-    reader: EvdevReader;
+    reader: EvdevReader = new EvdevReader();
+    pressedKeys: Set<string> = new Set();
 
-    constructor() {
-        this.reader = new EvdevReader();
+    constructor(target: string) {
+        this.reader.on("error", this.onError);
+        this.reader.on("EV_KEY", this.onKey);
+        this.reader.open(target);
+    }
 
+    private onError(e: Error) {
+        console.log("reader error : ", e);
+    }
+
+    private onKey(data: Evdev.Event) {
+        if (data.value === 1) {
+            this.pressedKeys.add(data.code);
+        } else if (data.value === 0) {
+            this.pressedKeys.delete(data.code);
+        }
     }
 }
